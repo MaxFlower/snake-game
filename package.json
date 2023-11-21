@@ -1,0 +1,22 @@
+{
+  "name": "snake-game",
+  "version": "1.0.0",
+  "description": "Easy way to entertain yourself with a game written in plain Javascript",
+  "type": "module",
+  "scripts": {
+    "dev": "vite src",
+    "build": "vite build src --outDir ../dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "keywords": [
+    "javascript",
+    "html",
+    "css",
+    "vite"
+  ],
+  "author": "Maksim Tsvetkov",
+  "license": "MIT"
+}
