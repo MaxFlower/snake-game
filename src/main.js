@@ -7,6 +7,8 @@ const gameStatus = document.getElementById('game-status');
 const gameBtn = document.querySelector('button');
 
 const FIELD_SIZE = 10;
+const TICK_IN_MS = 300;
+const WIN_CONDITION = 5; // number of eaten apples to win
 
 /**
  *  Game state
@@ -17,16 +19,20 @@ const FIELD_SIZE = 10;
  *  @var virtualField {cell[][]}
  *  @var snakeCells {cellCoordinate[]}
  *  @var snakeDirection {direction[]: up/down, left/right}
+ *  @var globalTimestamp {number | null}
  */
 let virtualField = [];
 let snakeCells = [];
-let snakeDirection = [0, 0];
+let snakeDirection = [1, 0];
+let globalTimestamp = null;
+let animationFrameId = null;
 
 /**
  * Create a virtual field array with empty state and draw cells
  * @return {void}
  */
 function initNewField() {
+    globalTimestamp = null;
     field.innerHTML = '';
     virtualField = [];
     for (let r = 0; r < FIELD_SIZE; r++) {
@@ -172,20 +178,93 @@ function activateKeyboard() {
 }
 
 /**
+ * Update game status values and return true/false state if the game is still on
+ * @private
+ * @return {boolean}
+ */
+function updateGameState() {
+    // step in direction
+    const stepR = snakeCells[0][0] + snakeDirection[0];
+    const stepC = snakeCells[0][1] + snakeDirection[1];
+
+    const isSnakeTouchedWall =
+        stepR === FIELD_SIZE || stepR < 0 ||
+        stepC === FIELD_SIZE || stepC < 0;
+    const isSnakeTouchedSnake = !isSnakeTouchedWall && virtualField[stepR][stepC] === 'snake';
+    const hasAllApplesEaten = snakeCells.length - 1 === WIN_CONDITION;
+
+    // check game over conditions
+    if (isSnakeTouchedWall || isSnakeTouchedSnake || hasAllApplesEaten) {
+        gameStatus.textContent = hasAllApplesEaten ? 'Congratulations!' : 'Game over! Try again.';
+        return false;
+    }
+
+    snakeCells = [
+        [stepR, stepC],
+        ...snakeCells,
+    ];
+
+    // apple has been eaten
+    if (virtualField[stepR][stepC] === 'apple') {
+        // generate a new one
+        const [foodR, foodC] = getEmptyCell();
+        virtualField[foodR][foodC] = 'apple';
+        gameStatus.textContent = `Apples: ${snakeCells.length - 1} of ${WIN_CONDITION}`;
+    } else {
+        // otherwise remove snake tail
+        let last = snakeCells.pop();
+        virtualField[last[0]][last[1]] = 'empty';
+    }
+    virtualField[stepR][stepC] = 'snake';
+
+    return true;
+}
+
+/**
+ * Tick function wrapped by requestAnimationFrame
+ * @param timestamp {number}
+ * @return {void}
+ */
+function tick(timestamp) {
+    if (!globalTimestamp) {
+        globalTimestamp = timestamp;
+    }
+
+    let isGameOn = true;
+
+    // invoke update in tick interval
+    if (timestamp - globalTimestamp > TICK_IN_MS) {
+        globalTimestamp = null;
+        isGameOn = updateGameState();
+        updateField();
+    }
+
+    // set a new tick if game is on
+    if (isGameOn) {
+        animationFrameId = requestAnimationFrame(tick);
+    } else {
+        cancelAnimationFrame(animationFrameId);
+        gameBtn.disabled = false;
+    }
+}
+
+/**
  * Game process
  *
  * 1. build the game field
  * 2. put an apple on the field randomly
  * 3. put a snake on the board randomly
  * 4. add a keyboard handler
- * 5. check field changes and game status on tick
+ * 5. run the game on click 'Start' button & check field changes and game status on tick
  */
+gameBtn.onclick = function () {
+    gameBtn.disabled = true;
+    gameStatus.textContent = 'In progress...';
 
+    initNewField(); // step 1
+    putApple(); // step 2
+    putSnake(); // step 3
+    activateKeyboard(); // step 4
 
-initNewField(); // step 1
-putApple(); // step 2
-putSnake(); // step 3
-
-updateField(); // re-render the game field with apple and snake
-
-activateKeyboard(); // step 4
+    animationFrameId = requestAnimationFrame(tick); // step 5
+}
