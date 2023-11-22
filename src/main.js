@@ -39,14 +39,39 @@ function initNewField() {
 }
 
 /**
+ * Find empty cell on the field
+ * and return a tuple of coordinates
+ * @return {number[]}
+ */
+function getEmptyCell() {
+    let rndR = null;
+    let rndC = null;
+    while (rndC === null && rndR === null || virtualField[rndR][rndC] !== 'empty') {
+        rndR = Math.floor(Math.random() * FIELD_SIZE);
+        rndC = Math.floor(Math.random() * FIELD_SIZE);
+    }
+    return [rndR, rndC];
+}
+
+/**
+ * Random empty cell becomes the cell with apple
+ * @return {void}
+ */
+function putApple() {
+    const [foodR, foodC] = getEmptyCell();
+    virtualField[foodR][foodC] = 'apple';
+}
+
+/**
  * Game process
  *
  * 1. build the game field
- * 2. put apple on the field randomly
- * 3. put snake on the board randomly
- * 4. add keyboard handler
+ * 2. put an apple on the field randomly
+ * 3. put a snake on the board randomly
+ * 4. add a keyboard handler
  * 5. check field changes and game status on tick
  */
 
 
 initNewField(); // step 1
+putApple(); // step 2

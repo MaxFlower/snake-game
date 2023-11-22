@@ -33,3 +33,12 @@ body {
     box-sizing: border-box;
     border: 1px solid #fff;
 }
+
+#field .cell.apple {
+    background-color: tomato;
+}
+
+#game-status {
+    font-weight: bold;
+    margin-bottom: 16px;
+}
