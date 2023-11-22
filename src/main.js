@@ -14,9 +14,12 @@ const FIELD_SIZE = 10;
  *  Game state
  *
  *  @type cell {string: 'empty', 'apple', 'snake'}
- *  virtualField {cell[][]}
+ *  @type cellCoordinate {row: number, col: number}
+ *  @var virtualField {cell[][]}
+ *  @var snakeCells {cellCoordinate[]}
  */
 let virtualField = [];
+let snakeCells = [];
 
 /**
  * Create a virtual field array with empty state and draw cells
@@ -41,6 +44,7 @@ function initNewField() {
 /**
  * Find empty cell on the field
  * and return a tuple of coordinates
+ * @private
  * @return {number[]}
  */
 function getEmptyCell() {
@@ -63,6 +67,56 @@ function putApple() {
 }
 
 /**
+ * Put the snake at the random empty cell
+ * @return {void}
+ */
+function putSnake() {
+    const [snakeR, snakeC] = getEmptyCell();
+    virtualField[snakeR][snakeC] = 'snake';
+    snakeCells = [[snakeR, snakeC]];
+}
+
+/**
+ * @private
+ * @param cell {HTMLElement}
+ * @param name {string}
+ * @return {void}
+ */
+function removeClass(cell, name) {
+    if (cell.classList.contains(name)) {
+        cell.classList.remove(name);
+    }
+}
+
+/**
+ * Update DOM elements based on state of virtualField
+ * @return {void}
+ */
+function updateField() {
+    for (let r = 0; r < FIELD_SIZE; r++) {
+        for (let c = 0; c < FIELD_SIZE; c++) {
+            const cell = document.querySelector(`div[data-row="${r}"][data-col="${c}"]`);
+
+            switch (virtualField[r][c]) {
+                case 'apple':
+                    removeClass(cell, 'snake');
+                    cell.classList.add('apple');
+                    break;
+                case 'snake':
+                    removeClass(cell, 'apple');
+                    cell.classList.add('snake');
+                    break;
+                case 'empty':
+                    removeClass(cell, 'snake');
+                    removeClass(cell, 'apple');
+                    break;
+                default:
+            }
+        }
+    }
+}
+
+/**
  * Game process
  *
  * 1. build the game field
@@ -75,3 +129,6 @@ function putApple() {
 
 initNewField(); // step 1
 putApple(); // step 2
+putSnake(); // step 3
+
+updateField(); // re-render the game field with apple and snake
