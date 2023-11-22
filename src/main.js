@@ -1,5 +1,3 @@
-console.log('main.js loaded and executed');
-
 /**
  * Define reusable DOM elements
  * @type {HTMLElement}
@@ -15,11 +13,14 @@ const FIELD_SIZE = 10;
  *
  *  @type cell {string: 'empty', 'apple', 'snake'}
  *  @type cellCoordinate {row: number, col: number}
+ *  @type direction {number: -1, 0, 1}
  *  @var virtualField {cell[][]}
  *  @var snakeCells {cellCoordinate[]}
+ *  @var snakeDirection {direction[]: up/down, left/right}
  */
 let virtualField = [];
 let snakeCells = [];
+let snakeDirection = [0, 0];
 
 /**
  * Create a virtual field array with empty state and draw cells
@@ -117,6 +118,60 @@ function updateField() {
 }
 
 /**
+ * Change snake direction based on key code event
+ *
+ * @example
+ * snakeDirection[0] === 1 snake goes up
+ * snakeDirection[0] === -1 snake goes down
+ * snakeDirection[0] === 0 snake goes horizontally
+ * snakeDirection[1] === 1 snake goes left
+ * snakeDirection[1] === -1 snake goes right
+ * snakeDirection[1] === 0 snake goes vertically
+ *
+ * @private
+ * @param e {KeyboardEvent}
+ * @return {void}
+ */
+function handleKeyboard(e) {
+    switch (e.code) {
+        case 'ArrowUp':
+            if (snakeDirection[0] === 1) {
+                snakeCells.reverse()
+            }
+            snakeDirection = [-1, 0]
+            break
+        case 'ArrowRight':
+            if (snakeDirection[1] === -1) {
+                snakeCells.reverse()
+            }
+            snakeDirection = [0, 1]
+            break
+        case 'ArrowDown':
+            if (snakeDirection[0] === -1) {
+                snakeCells.reverse()
+            }
+            snakeDirection = [1, 0]
+            break
+        case 'ArrowLeft':
+            if (snakeDirection[1] === 1) {
+                snakeCells.reverse()
+            }
+            snakeDirection = [0, -1]
+            break
+        default:
+    }
+}
+
+/**
+ * Add global keydown handler
+ * @return {void}
+ */
+function activateKeyboard() {
+    window.addEventListener('keydown', handleKeyboard);
+    window.onbeforeunload = () => window.removeEventListener('keydown', handleKeyboard);
+}
+
+/**
  * Game process
  *
  * 1. build the game field
@@ -132,3 +187,5 @@ putApple(); // step 2
 putSnake(); // step 3
 
 updateField(); // re-render the game field with apple and snake
+
+activateKeyboard(); // step 4
