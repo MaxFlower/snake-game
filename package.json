@@ -15,7 +15,8 @@
     "javascript",
     "html",
     "css",
-    "vite"
+    "vite",
+    "jsdoc"
   ],
   "author": "Maksim Tsvetkov",
   "license": "MIT"

@@ -8,7 +8,7 @@ const gameBtn = document.querySelector('button');
 
 const FIELD_SIZE = 10;
 const TICK_IN_MS = 300;
-const WIN_CONDITION = 5; // number of eaten apples to win
+const WIN_CONDITION = 10; // number of eaten apples to win
 
 /**
  *  Game state
